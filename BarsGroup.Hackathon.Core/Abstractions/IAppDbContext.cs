@@ -17,7 +17,7 @@ namespace BarsGroup.Hackathon.Core.Abstractions
 		/// <summary>
 		/// Файлы
 		/// </summary>
-		DbSet<IdentityUser<Guid>> Users { get; set; }
+		DbSet<User> Users { get; set; }
 
 		/// <summary>
 		/// Файлы
