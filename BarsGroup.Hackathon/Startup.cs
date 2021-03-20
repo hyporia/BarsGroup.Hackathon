@@ -1,8 +1,10 @@
 using BarsGroup.Hackathon.Core;
+using BarsGroup.Hackathon.Core.Abstractions;
 using BarsGroup.Hackathon.Core.Entities;
 using BarsGroup.Hackathon.Db;
 using BarsGroup.Hackathon.DB;
 using BarsGroup.Hackathon.ObjectStorage;
+using BarsGroup.Hackathon.Web;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -84,6 +86,8 @@ namespace BarsGroup.Hackathon
 					   .AllowAnyMethod()
 					   .AllowAnyHeader();
 			}));
+			services.AddScoped<IUserContext, UserContext>();
+
 			services.AddDomain();
 		}
 

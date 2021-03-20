@@ -1,25 +1,20 @@
-import { useState } from 'react';
-import LoginForm from './Components/LoginForm';
+import { SnackbarProvider } from 'notistack';
+import React, { useState } from 'react';
+import Drawer from './Components/Drawer';
+import LoginForm from './Components/Login';
 
 function App() {
-  const adminUser = {
-    email: "admin@admin.com",
-    password: "admin123"
-  };
-
-  const [user, setUser] = useState({ name: "", email: "" });
-  const [error, setError] = useState("");
-
-  const Login = details => {
-    console.log(details);
-  }
-
-  const Logout = () => {
-    console.log("Logout");
-  }
+  const [login, setLogin] = useState("");
   return (
     <div className="App">
-      <LoginForm login={Login} error={error} />
+      <SnackbarProvider
+        autoHideDuration={null}
+        maxSnack={10}
+        anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+        preventDuplicate={true}>
+        {!!login && (<Drawer />)}
+        {!login && (<LoginForm setLogin={setLogin} />)}
+      </SnackbarProvider >
     </div>
   );
 }

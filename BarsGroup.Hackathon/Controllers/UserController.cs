@@ -56,7 +56,7 @@ namespace BarsGroup.Hackathon.Web.Controllers
 				var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 				var principal = new ClaimsPrincipal(identity);
 				await httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-				return new BaseResponse<LoginUserCommandResponse> { Result = new LoginUserCommandResponse { IsLoggedIn = true } };
+				return new BaseResponse<LoginUserCommandResponse> { Result = new LoginUserCommandResponse { Success = true } };
 			}
 			return new BaseResponse<LoginUserCommandResponse> { Error = "Неверный логин или пароль" };
 		}

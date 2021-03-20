@@ -17,6 +17,7 @@ namespace Abdt.ElectronicArchive.AuthorizationService.Storage.PostgreSql.Configu
 			builder.Property(x => x.ContentType).IsRequired();
 			builder.Property(x => x.Address).IsRequired();
 			builder.Property(x => x.UserId).IsRequired();
+			builder.Property(x => x.IsDeleted).HasDefaultValue(false);
 			builder.HasOne(x => x.User)
 				.WithMany(x => x.Files)
 				.HasForeignKey(x => x.UserId)

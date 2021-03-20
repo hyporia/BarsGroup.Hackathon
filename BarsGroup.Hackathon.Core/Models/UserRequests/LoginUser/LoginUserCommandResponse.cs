@@ -2,6 +2,6 @@
 {
 	public class LoginUserCommandResponse
 	{
-		public bool IsLoggedIn { get; set; }
+		public bool Success { get; set; }
 	}
 }

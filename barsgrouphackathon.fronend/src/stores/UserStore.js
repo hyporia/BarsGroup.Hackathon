@@ -1,5 +1,0 @@
-class UserStore {
-    constructor() {
-
-    }
-}

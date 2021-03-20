@@ -20,6 +20,11 @@ namespace BarsGroup.Hackathon.Core.Abstractions
 		DbSet<IdentityUser<Guid>> Users { get; set; }
 
 		/// <summary>
+		/// Файлы
+		/// </summary>
+		DbSet<IdentityRole<Guid>> Roles { get; set; }
+
+		/// <summary>
 		/// Сохранить изменения в БД
 		/// </summary>
 		/// <param name="cancellationToken"></param>
