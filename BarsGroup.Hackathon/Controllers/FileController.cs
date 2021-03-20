@@ -1,7 +1,11 @@
 ﻿using BarsGroup.Hackathon.Core.Abstractions;
+using BarsGroup.Hackathon.Core.Models;
+using BarsGroup.Hackathon.Core.Models.FileRequests.GetByUserId;
+using BarsGroup.Hackathon.Core.Models.FileRequests.SaveFileCommand;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
+using System;
 using System.Threading.Tasks;
 
 namespace BarsGroup.Hackathon.Web.Controllers
@@ -11,18 +15,40 @@ namespace BarsGroup.Hackathon.Web.Controllers
 	public class FileController : ControllerBase
 	{
 		private readonly IObjectStorage storage;
+		private readonly IFileService fileService;
 
-		public FileController(IObjectStorage storage)
+		public FileController(IObjectStorage storage, IFileService fileService)
 		{
 			this.storage = storage;
+			this.fileService = fileService;
 		}
 
 		[HttpPost]
-		public async Task<FileStreamResult> UpdloadFileAsync(IFormFile file)
+		[Authorize]
+		public async Task<BaseResponse<SaveFileCommandResponse>> UpdloadFileAsync(IFormFile file)
 		{
-			var result = await storage.PutAsync(new Core.Models.ObjectPutParams { FileName = file.FileName, ContentType = file.ContentType }, file.OpenReadStream());
-			var fileFromStorage = await storage.GetAsync(result.Key);
-			return File(new MemoryStream(fileFromStorage), file.ContentType, file.FileName);
+			using var command = new SaveFileCommand
+			{
+				Name = file.FileName,
+				ContentType = file.ContentType,
+				Stream = file.OpenReadStream()
+			};
+			var result = await fileService.SaveFileAsync(command);
+			return new BaseResponse<SaveFileCommandResponse>
+			{
+				Result = result
+			};
+		}
+
+		[HttpGet("{userId}")]
+		public async Task<BaseResponse<GetByUserIdQueryResponse>> GetUserFilesAsync(Guid id)
+		{
+			var result = await fileService.GetUserFilesAsync(id);
+			return new BaseResponse<GetByUserIdQueryResponse>
+			{
+				Result = result,
+				Error = null
+			};
 		}
 	}
 }

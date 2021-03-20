@@ -1,6 +1,9 @@
+using BarsGroup.Hackathon.Core;
+using BarsGroup.Hackathon.Core.Entities;
 using BarsGroup.Hackathon.Db;
 using BarsGroup.Hackathon.DB;
 using BarsGroup.Hackathon.ObjectStorage;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
@@ -35,12 +38,27 @@ namespace BarsGroup.Hackathon
 			var sqlLoggerFactory = Env.IsDevelopment()
 				? LoggerFactory.Create(builder => { builder.AddConsole(); })
 				: null;
+
+			services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+					.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+
 			services.AddPostgreSqlStorage(new PostgresDbOptions
 			{
 				ConnectionString = Configuration["App:DbConnectionString"]
 			}, sqlLoggerFactory);
 
-			services.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>().AddEntityFrameworkStores<AppDbContext>();
+			services.AddIdentity<User, IdentityRole<Guid>>().AddEntityFrameworkStores<AppDbContext>();
+
+			services.Configure<IdentityOptions>(options =>
+			{
+				// Default Password settings.
+				options.Password.RequireDigit = false;
+				options.Password.RequireLowercase = false;
+				options.Password.RequireNonAlphanumeric = false;
+				options.Password.RequireUppercase = false;
+				options.Password.RequiredLength = 3;
+				options.Password.RequiredUniqueChars = 1;
+			});
 
 
 			services.AddAwsS3Storage(options =>
@@ -66,17 +84,15 @@ namespace BarsGroup.Hackathon
 					   .AllowAnyMethod()
 					   .AllowAnyHeader();
 			}));
-
+			services.AddDomain();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			app.UseCors("AllowAll");
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-			}
+
+			app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 			app.UseHttpsRedirection();
 

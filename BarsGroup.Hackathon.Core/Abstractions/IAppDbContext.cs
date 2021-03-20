@@ -1,5 +1,7 @@
 ﻿using BarsGroup.Hackathon.Core.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,6 +13,11 @@ namespace BarsGroup.Hackathon.Core.Abstractions
 		/// Файлы
 		/// </summary>
 		public DbSet<File> Files { get; set; }
+
+		/// <summary>
+		/// Файлы
+		/// </summary>
+		DbSet<IdentityUser<Guid>> Users { get; set; }
 
 		/// <summary>
 		/// Сохранить изменения в БД

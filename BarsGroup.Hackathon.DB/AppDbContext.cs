@@ -18,6 +18,8 @@ namespace BarsGroup.Hackathon.DB
 	{
 		public DbSet<File> Files { get; set; }
 
+		public override DbSet<IdentityUser<Guid>> Users { get; set; }
+
 		public AppDbContext(DbContextOptions<AppDbContext> options)
 			: base(options)
 		{
