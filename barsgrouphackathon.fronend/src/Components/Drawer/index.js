@@ -13,15 +13,18 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import MailIcon from '@material-ui/icons/Mail';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import FolderIcon from '@material-ui/icons/Folder';
 import MenuIcon from '@material-ui/icons/Menu';
 import clsx from 'clsx';
 import React from 'react';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Link, Redirect, Route, Switch } from 'react-router-dom';
+import Bucket from '../Bucket';
 import useStyles from '../Drawer/useStyles';
 import FileList from '../File/List';
 
-export default function MiniDrawer({ login }) {
+export default function MiniDrawer({ login, handleLogout }) {
     const classes = useStyles();
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
@@ -81,20 +84,33 @@ export default function MiniDrawer({ login }) {
                     </div>
                     <Divider />
                     <List>
-                        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-                            <ListItem button key={text}>
-                                <ListItemIcon><MailIcon /></ListItemIcon>
-                                <ListItemText primary={text} />
+                        <Link to={'/files'} key={"Файлы"} >
+                            <ListItem button key={"Файлы"}>
+                                <ListItemIcon><FolderIcon /></ListItemIcon>
+                                <ListItemText primary={"Файлы"} />
                             </ListItem>
-                        ))}
+                        </Link>
+                        <Link to={'/bucket'} key={"Корзина"} >
+                            <ListItem button key={"Корзина"}>
+                                <ListItemIcon><DeleteOutlineIcon /></ListItemIcon>
+                                <ListItemText primary={"Корзина"} />
+                            </ListItem>
+                        </Link>
+
+                        <Divider style={{ marginBottom: '10px' }} />
+                        <Link to={''} style={{ textDecoration: 'none', color: 'inherit' }} ><ListItem button onClick={handleLogout}>
+                            <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+
+                            <ListItemText primary={"Выход"} />
+                        </ListItem></Link>
                     </List>
-                    <Divider />
                 </Drawer>
                 <Box display='flex' flexDirection='column' style={{ minHeight: '100vh' }} flex={1}>
                     <div className={classes.toolbar} />
                     <Switch>
                         <Route exact path="/" render={() => (<Redirect to="/files" />)} />
-                        <Route name="Файлы" path="/files" exact={true} component={FileList} isMenuItem={true} />
+                        <Route name="Файлы" path="/files" exact={true} component={FileList} />
+                        <Route name="Корзина" path="/bucket" exact={true} component={Bucket} />
                         <Route path="*" render={() => (<Redirect to="/files" />)} />
                     </Switch>
                 </Box>

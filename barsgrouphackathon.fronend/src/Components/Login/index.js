@@ -1,6 +1,8 @@
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
+import Cookies from 'js-cookie';
+import { useSnackbar } from 'notistack';
 import React, { useState } from 'react';
 import { AuthorizeUser } from '../../Client';
 import TextField from '../Common/TextField';
@@ -8,11 +10,18 @@ import TextField from '../Common/TextField';
 const LoginForm = ({ setLogin }) => {
     const [details, setDetails] = useState({ login: "", password: "" });
     const [error, setError] = useState("");
-    debugger;
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const loginFromCookies = Cookies.get('login');
+    if (loginFromCookies) {
+        setLogin(loginFromCookies);
+    }
     const Login = details => {
         AuthorizeUser(details.login, details.password)
             .then(resp => {
                 setLogin(details.login);
+            })
+            .catch(e => {
+                enqueueSnackbar(e, { variant: 'error', action: null });
             });
     }
 

@@ -5,6 +5,7 @@ using BarsGroup.Hackathon.Core.Models.FileRequests.GetByUserId;
 using BarsGroup.Hackathon.Core.Models.UserRequests.LoginUser;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 namespace BarsGroup.Hackathon.Web.Controllers
 {
 	[ApiController]
+	[Authorize]
 	[Route("[controller]")]
 	public class UserController
 	{
@@ -46,6 +48,7 @@ namespace BarsGroup.Hackathon.Web.Controllers
 		}
 
 		[HttpPost("login")]
+		[AllowAnonymous]
 		public async Task<BaseResponse<LoginUserCommandResponse>> LogInAsync(
 			[FromBody] LoginUserCommand command)
 		{
@@ -59,6 +62,16 @@ namespace BarsGroup.Hackathon.Web.Controllers
 				return new BaseResponse<LoginUserCommandResponse> { Result = new LoginUserCommandResponse { Success = true } };
 			}
 			return new BaseResponse<LoginUserCommandResponse> { Error = "Неверный логин или пароль" };
+		}
+
+		[HttpPost("logout")]
+		public async Task<BaseResponse<bool>> LogOutAsync()
+		{
+			await httpContextAccessor.HttpContext.SignOutAsync();
+			return new BaseResponse<bool>
+			{
+				Result = true
+			};
 		}
 	}
 }

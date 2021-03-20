@@ -55,12 +55,14 @@ namespace BarsGroup.Hackathon.Core.Services
 			};
 		}
 
-		public async Task<GetByUserIdQueryResponse> GetByUserIdAsync(Guid id)
+		public async Task<GetByUserIdQueryResponse> GetByUserIdAsync(Guid id, bool onlyDeleted = false)
 		{
 			var user = await userContext.GetCurrentUserAsync();
 			var isAdmin = await dbContext.Roles.AnyAsync(x => x.Name == "admin");
 			if (!isAdmin) return new GetByUserIdQueryResponse { Files = new List<GetByUserIdQueryResponseItem>() };
-			var files = await dbContext.Files.Where(x => x.UserId == id).Select(x =>
+			var files = await dbContext.Files
+				.Where(x => x.IsDeleted == onlyDeleted)
+				.Where(x => x.UserId == id).Select(x =>
 				new GetByUserIdQueryResponseItem
 				{
 					Id = x.Id,
@@ -87,12 +89,12 @@ namespace BarsGroup.Hackathon.Core.Services
 			return new DeleteFileByIdCommandResponse { Success = true };
 		}
 
-		public async Task<GetByUserIdQueryResponse> GetAsync()
+		public async Task<GetByUserIdQueryResponse> GetAsync(bool onlyDeleted = false)
 		{
 			var user = await userContext.GetCurrentUserAsync();
 			var files = await dbContext.Files
 				.Where(x => x.UserId == user.Id)
-				.Where(x => !x.IsDeleted)
+				.Where(x => x.IsDeleted == onlyDeleted)
 				.Select(x =>
 				new GetByUserIdQueryResponseItem
 				{
@@ -106,6 +108,40 @@ namespace BarsGroup.Hackathon.Core.Services
 
 			return new GetByUserIdQueryResponse { Files = files };
 
+		}
+
+		public async Task<DeleteFileByIdCommandResponse> DeleteFromBucket(List<Guid> ids)
+		{
+			ids ??= new List<Guid>();
+			var user = await userContext.GetCurrentUserAsync();
+			var isAdmin = await dbContext.Roles.AnyAsync(x => x.Name == "admin");
+			if (!isAdmin)
+			{
+				var filesToDelete = await dbContext.Files
+					.Where(x => x.IsDeleted)
+					.Where(x => x.UserId == user.Id)
+					.Where(x => !ids.Any() || ids.Contains(x.Id))
+					.ToListAsync();
+				foreach (var file in filesToDelete)
+				{
+					await objectStorage.RemoveAsync(file.Address);
+				}
+				dbContext.Files.RemoveRange(filesToDelete);
+				await dbContext.SaveChangesAsync();
+			}
+			else
+			{
+				var filesToDelete = await dbContext.Files
+					.Where(x => x.IsDeleted)
+					.Where(x => !ids.Any() || ids.Contains(x.Id)).ToListAsync();
+				foreach (var file in filesToDelete)
+				{
+					await objectStorage.RemoveAsync(file.Address);
+				}
+				dbContext.Files.RemoveRange(filesToDelete);
+				await dbContext.SaveChangesAsync();
+			}
+			return new DeleteFileByIdCommandResponse { Success = true };
 		}
 	}
 }

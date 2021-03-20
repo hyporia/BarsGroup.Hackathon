@@ -9,13 +9,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BarsGroup.Hackathon.Web.Controllers
 {
 	[ApiController]
-	[Route("[controller]")]
 	[Authorize]
+	[Route("[controller]")]
 	public class FileController : ControllerBase
 	{
 		private readonly IFileService fileService;
@@ -44,18 +45,21 @@ namespace BarsGroup.Hackathon.Web.Controllers
 		}
 
 		[HttpGet]
-		public async Task<BaseResponse<GetByUserIdQueryResponse>> GetAsync([FromQuery] Guid? userId)
+		public async Task<BaseResponse<GetByUserIdQueryResponse>> GetAsync(
+			[FromQuery] Guid? userId,
+			[FromQuery] bool? onlyDeleted)
 		{
+			onlyDeleted ??= false;
 			if (userId.HasValue)
 				return new BaseResponse<GetByUserIdQueryResponse>
 				{
-					Result = await fileService.GetByUserIdAsync(userId.Value),
+					Result = await fileService.GetByUserIdAsync(userId.Value, onlyDeleted.Value),
 					Error = null
 				};
 
 			return new BaseResponse<GetByUserIdQueryResponse>
 			{
-				Result = await fileService.GetAsync(),
+				Result = await fileService.GetAsync(onlyDeleted.Value),
 				Error = null
 			};
 		}
@@ -64,6 +68,17 @@ namespace BarsGroup.Hackathon.Web.Controllers
 		public async Task<BaseResponse<DeleteFileByIdCommandResponse>> DeleteFileByIdAsync(Guid id)
 		{
 			var result = await fileService.DeleteByIdAsync(id);
+			return new BaseResponse<DeleteFileByIdCommandResponse>
+			{
+				Result = result,
+				Error = null
+			};
+		}
+
+		[HttpDelete]
+		public async Task<BaseResponse<DeleteFileByIdCommandResponse>> DeleteFileByIdAsync([FromQuery] List<Guid> ids)
+		{
+			var result = await fileService.DeleteFromBucket(ids);
 			return new BaseResponse<DeleteFileByIdCommandResponse>
 			{
 				Result = result,
