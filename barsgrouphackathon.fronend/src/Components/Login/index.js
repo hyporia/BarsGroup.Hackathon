@@ -8,7 +8,7 @@ import TextField from '../Common/TextField';
 const LoginForm = ({ setLogin }) => {
     const [details, setDetails] = useState({ login: "", password: "" });
     const [error, setError] = useState("");
-
+    debugger;
     const Login = details => {
         AuthorizeUser(details.login, details.password)
             .then(resp => {

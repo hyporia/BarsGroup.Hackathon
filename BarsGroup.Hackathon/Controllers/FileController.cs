@@ -30,7 +30,6 @@ namespace BarsGroup.Hackathon.Web.Controllers
 		[HttpPost]
 		public async Task<BaseResponse<SaveFileCommandResponse>> UpdloadFileAsync(IFormFile file)
 		{
-			var userId = await userManager.GetUserAsync(User);
 			using var command = new SaveFileCommand
 			{
 				Name = file.FileName,
