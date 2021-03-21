@@ -11,6 +11,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { useTheme } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
@@ -23,8 +24,9 @@ import { BrowserRouter, Link, Redirect, Route, Switch } from 'react-router-dom';
 import Bucket from '../Bucket';
 import useStyles from '../Drawer/useStyles';
 import FileList from '../File/List';
+import UserList from '../User/List';
 
-export default function MiniDrawer({ login, handleLogout }) {
+export default function MiniDrawer({ login, handleLogout, isAdmin }) {
     const classes = useStyles();
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
@@ -84,18 +86,24 @@ export default function MiniDrawer({ login, handleLogout }) {
                     </div>
                     <Divider />
                     <List>
-                        <Link to={'/files'} key={"Файлы"} >
+                        {isAdmin && (<Link to={'/users'} key={"Пользователи"} >
+                            <ListItem button key={"Пользователи"}>
+                                <ListItemIcon><AccountBoxIcon /></ListItemIcon>
+                                <ListItemText primary={"Пользователи"} />
+                            </ListItem>
+                        </Link>)}
+                        {!isAdmin && (<Link to={'/files'} key={"Файлы"} >
                             <ListItem button key={"Файлы"}>
                                 <ListItemIcon><FolderIcon /></ListItemIcon>
                                 <ListItemText primary={"Файлы"} />
                             </ListItem>
-                        </Link>
-                        <Link to={'/bucket'} key={"Корзина"} >
+                        </Link>)}
+                        {!isAdmin && (<Link to={'/bucket'} key={"Корзина"} >
                             <ListItem button key={"Корзина"}>
                                 <ListItemIcon><DeleteOutlineIcon /></ListItemIcon>
                                 <ListItemText primary={"Корзина"} />
                             </ListItem>
-                        </Link>
+                        </Link>)}
 
                         <Divider style={{ marginBottom: '10px' }} />
                         <Link to={''} style={{ textDecoration: 'none', color: 'inherit' }} ><ListItem button onClick={handleLogout}>
@@ -108,8 +116,12 @@ export default function MiniDrawer({ login, handleLogout }) {
                 <Box display='flex' flexDirection='column' style={{ minHeight: '100vh' }} flex={1}>
                     <div className={classes.toolbar} />
                     <Switch>
-                        <Route exact path="/" render={() => (<Redirect to="/files" />)} />
+                        {isAdmin && (
+                            <Route exact path="/" render={() => (<Redirect to="/users" />)} />)}
+                        {!isAdmin && (
+                            <Route exact path="/" render={() => (<Redirect to="/files" />)} />)}
                         <Route name="Файлы" path="/files" exact={true} component={FileList} />
+                        <Route name="Пользователи" path="/users" exact={true} component={UserList} />
                         <Route name="Корзина" path="/bucket" exact={true} component={Bucket} />
                         <Route path="*" render={() => (<Redirect to="/files" />)} />
                     </Switch>

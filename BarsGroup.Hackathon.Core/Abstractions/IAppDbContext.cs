@@ -9,20 +9,16 @@ namespace BarsGroup.Hackathon.Core.Abstractions
 {
 	public interface IAppDbContext
 	{
-		/// <summary>
-		/// Файлы
-		/// </summary>
+
 		public DbSet<File> Files { get; set; }
 
-		/// <summary>
-		/// Файлы
-		/// </summary>
+
 		DbSet<User> Users { get; set; }
 
-		/// <summary>
-		/// Файлы
-		/// </summary>
+
 		DbSet<IdentityRole<Guid>> Roles { get; set; }
+
+		DbSet<IdentityUserRole<Guid>> UserRoles { get; set; }
 
 		/// <summary>
 		/// Сохранить изменения в БД

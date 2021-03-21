@@ -1,5 +1,6 @@
 ﻿using BarsGroup.Hackathon.Core.Abstractions;
 using BarsGroup.Hackathon.Core.Entities;
+using BarsGroup.Hackathon.Core.Enums;
 using BarsGroup.Hackathon.Core.Exceptions;
 using BarsGroup.Hackathon.Core.Models.FileRequests.DeleteFile;
 using BarsGroup.Hackathon.Core.Models.FileRequests.GetByUserId;
@@ -28,13 +29,15 @@ namespace BarsGroup.Hackathon.Core.Services
 
 		public async Task<SaveFileCommandResponse> SaveAsync(SaveFileCommand command)
 		{
+			var user = await userContext.GetCurrentUserAsync();
+			var dataSize = await dbContext.Files.Where(x => x.UserId == user.Id).SumAsync(x => (double)x.Size / 1048576);
+			if (dataSize + (double)command.Stream.Length / 1048576 > 100) return null;
 			var putResult = await objectStorage.PutAsync(
 				new Models.ObjectPutParams
 				{
 					ContentType = command.ContentType,
 					FileName = command.Name
 				}, command.Stream);
-			var user = await userContext.GetCurrentUserAsync();
 
 			var file = new File
 			{
@@ -81,8 +84,9 @@ namespace BarsGroup.Hackathon.Core.Services
 			var file = await dbContext.Files.FirstOrDefaultAsync(x => x.Id == id)
 				?? throw new NotFoundException("Не удалось найти файл с указанным идентификатором");
 			var user = await userContext.GetCurrentUserAsync();
+			var isAdmin = await dbContext.Roles.AnyAsync(x => x.Name == "admin");
 
-			if (file.UserId != user.Id) throw new NotFoundException("Не удалось найти файл с указанным идентификатором");
+			if (!isAdmin && file.UserId != user.Id) throw new NotFoundException("Не удалось найти файл с указанным идентификатором");
 			file.IsDeleted = true;
 			dbContext.Files.Update(file);
 			await dbContext.SaveChangesAsync();
@@ -104,7 +108,8 @@ namespace BarsGroup.Hackathon.Core.Services
 					Name = x.Name,
 					Size = x.Size
 				}
-			).ToListAsync();
+			)
+				.OrderByDescending(x => x.Size).ToListAsync();
 
 			return new GetByUserIdQueryResponse { Files = files };
 
@@ -114,7 +119,8 @@ namespace BarsGroup.Hackathon.Core.Services
 		{
 			ids ??= new List<Guid>();
 			var user = await userContext.GetCurrentUserAsync();
-			var isAdmin = await dbContext.Roles.AnyAsync(x => x.Name == "admin");
+			var isAdmin = await dbContext.UserRoles
+				.AnyAsync(x => x.UserId == user.Id && x.RoleId == Users.Admin);
 			if (!isAdmin)
 			{
 				var filesToDelete = await dbContext.Files
@@ -142,6 +148,21 @@ namespace BarsGroup.Hackathon.Core.Services
 				await dbContext.SaveChangesAsync();
 			}
 			return new DeleteFileByIdCommandResponse { Success = true };
+		}
+
+		public async Task<DownloadFileByIdQueryResponse> DownloadFileById(Guid id)
+		{
+			var user = await userContext.GetCurrentUserAsync();
+			var file = await dbContext.Files.FirstOrDefaultAsync(x => x.Id == id && x.UserId == user.Id)
+				?? throw new NotFoundException("Не удалось найти файл с указанным идентификатором");
+
+			var stream = await objectStorage.GetStreamAsync(file.Address);
+			return new DownloadFileByIdQueryResponse
+			{
+				ContentType = file.ContentType,
+				Name = file.Name,
+				Stream = stream
+			};
 		}
 	}
 }

@@ -7,5 +7,7 @@ namespace BarsGroup.Hackathon.Core.Entities
 	public class User : IdentityUser<Guid>
 	{
 		public List<File> Files { get; set; }
+
+		public List<FileShare> FileShares { get; set; }
 	}
 }

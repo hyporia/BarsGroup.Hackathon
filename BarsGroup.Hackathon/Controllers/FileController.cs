@@ -37,7 +37,12 @@ namespace BarsGroup.Hackathon.Web.Controllers
 				ContentType = file.ContentType,
 				Stream = file.OpenReadStream()
 			};
+
 			var result = await fileService.SaveAsync(command);
+			if (result == null) return new BaseResponse<SaveFileCommandResponse>
+			{
+				Error = "Превышен допустимый лимит занимаемого пространства"
+			};
 			return new BaseResponse<SaveFileCommandResponse>
 			{
 				Result = result
@@ -84,6 +89,13 @@ namespace BarsGroup.Hackathon.Web.Controllers
 				Result = result,
 				Error = null
 			};
+		}
+
+		[HttpGet("{id}")]
+		public async Task<FileStreamResult> DownloadFileAsync(Guid id)
+		{
+			var fileData = await fileService.DownloadFileById(id);
+			return File(fileData.Stream, fileData.ContentType, fileData.Name);
 		}
 	}
 }

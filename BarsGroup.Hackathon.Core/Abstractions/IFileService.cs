@@ -14,5 +14,7 @@ namespace BarsGroup.Hackathon.Core.Abstractions
 		Task<SaveFileCommandResponse> SaveAsync(SaveFileCommand command);
 		Task<DeleteFileByIdCommandResponse> DeleteByIdAsync(Guid id);
 		Task<DeleteFileByIdCommandResponse> DeleteFromBucket(List<Guid> ids);
+
+		Task<DownloadFileByIdQueryResponse> DownloadFileById(Guid id);
 	}
 }

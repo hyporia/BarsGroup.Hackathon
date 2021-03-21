@@ -3,5 +3,7 @@
 	public class LoginUserCommandResponse
 	{
 		public bool Success { get; set; }
+
+		public bool IsAdmin { get; set; }
 	}
 }

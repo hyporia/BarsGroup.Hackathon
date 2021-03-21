@@ -14,11 +14,11 @@ namespace BarsGroup.Hackathon.DB
 	/// <summary>
 	/// Контекст EF Core для приложения
 	/// </summary>
-	public class AppDbContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole<Guid>, Guid>, IAppDbContext
+	public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>, IAppDbContext
 	{
 		public DbSet<File> Files { get; set; }
 
-		public override DbSet<IdentityUser<Guid>> Users { get; set; }
+		public override DbSet<User> Users { get; set; }
 
 		public AppDbContext(DbContextOptions<AppDbContext> options)
 			: base(options)
@@ -30,7 +30,15 @@ namespace BarsGroup.Hackathon.DB
 			base.OnModelCreating(builder);
 			builder.HasDefaultSchema("hackathon");
 			builder.ApplyConfigurationsFromAssembly(typeof(FileConfiguration).Assembly);
+
+			builder.Entity<IdentityRole<Guid>>().HasData(new IdentityRole<Guid>
+			{
+				Id = Core.Enums.Users.Admin,
+				Name = "admin",
+				NormalizedName = "admin"
+			});
 		}
+
 
 		public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
 			await SaveChangesAsync(true, cancellationToken);

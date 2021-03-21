@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BarsGroup.Hackathon.Core.Entities
 {
@@ -12,5 +13,6 @@ namespace BarsGroup.Hackathon.Core.Entities
 
 		public Guid UserId { get; set; }
 		public User User { get; set; }
+		public List<FileShare> FileShares { get; set; }
 	}
 }

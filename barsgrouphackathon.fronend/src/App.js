@@ -8,20 +8,27 @@ import LoginForm from './Components/Login';
 
 function App() {
   const [login, setLogin] = useState("");
-  const setUserLogin = (login) => {
+  const [isAdmin, setAdmin] = useState(false);
+  const setUserData = ({ login, isAdmin }) => {
     if (!!login) {
       Cookies.set('login', login, { expires: 7 });
     } else {
       Cookies.remove("login");
     }
+    if (isAdmin) {
+      Cookies.set('isAdmin', isAdmin, { expires: 7 });
+    } else {
+      Cookies.remove("isAdmin");
+    }
     setLogin(login);
+    setAdmin(isAdmin);
   }
 
   const logoutHandler = () => {
     LogoutUser()
       .then()
       .catch()
-      .finally(setUserLogin(''));
+      .finally(setUserData({ login: '', isAdmin: false }));
   }
   return (
     <div className="App">
@@ -30,8 +37,8 @@ function App() {
         maxSnack={3}
         anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
         preventDuplicate={true}>
-        {!!login && (<Drawer login={login} handleLogout={logoutHandler} />)}
-        {!login && (<LoginForm setLogin={setUserLogin} />)}
+        {!!login && (<Drawer login={login} isAdmin={isAdmin} handleLogout={logoutHandler} />)}
+        {!login && (<LoginForm setUserData={setUserData} setAdmin={setAdmin} />)}
       </SnackbarProvider >
     </div>
   );

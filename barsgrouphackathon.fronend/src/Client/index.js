@@ -9,9 +9,9 @@ const config = {
 
 
 export const AuthorizeUser = (login, password) =>
-    axios.post(`${baseUrl}/user/login`, { login, password })
+    axios.post(`${baseUrl}/user/login`, { login, password }, config)
         .then(resp => {
-            if (!!resp?.data?.result?.success)
+            if (!!resp?.data?.result)
                 return Promise.resolve(resp.data)
             else return Promise.reject(resp?.data?.error)
         })
@@ -78,7 +78,6 @@ export const DeleteFilesFromBucket = (ids) => {
 
 
 export const SaveFile = (file) => {
-    axios.defaults.withCredentials = true;
     var formData = new FormData();
     formData.append('file', file);
     return axios.post(`${baseUrl}/File`, formData, config)
@@ -91,3 +90,53 @@ export const SaveFile = (file) => {
         })
 }
 
+export const DeleteUser = (id) =>
+    axios.delete(`${baseUrl}/User/${id}`, config)
+        .then(resp => {
+            if (!resp?.data?.error)
+                return Promise.resolve(resp.data.result);
+        })
+        .catch(e => {
+            console.error(e);
+            return Promise.reject(e);
+        });
+
+export const GetUsers = () => {
+    return axios.get(`${baseUrl}/User`, config)
+        .then(resp => {
+            if (!!resp?.data?.result?.users)
+                return Promise.resolve(resp.data.result.users)
+        })
+        .catch(e => {
+            console.error(e);
+            return Promise.reject(e);
+        });
+}
+
+
+export const AddUser = (userData) => {
+    return axios.post(`${baseUrl}/User`, userData, config)
+        .then(resp => {
+            if (!!resp?.data?.result)
+                return Promise.resolve(resp.data.result)
+        })
+        .catch(e => {
+            console.error(e);
+            return Promise.reject(e);
+        });
+}
+
+const FileDownload = require('js-file-download');
+
+export const DownloadFileById = (id, name) => {
+    return axios.get(`${baseUrl}/File/${id}`, { ...config, responseType: 'blob' })
+        .then(resp => {
+            if (!!resp?.data)
+                FileDownload(resp.data, name);
+            return Promise.resolve(resp.data.result)
+        })
+        .catch(e => {
+            console.error(e);
+            return Promise.reject(e);
+        });
+}

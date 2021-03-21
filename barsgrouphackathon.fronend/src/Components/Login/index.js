@@ -7,18 +7,20 @@ import React, { useState } from 'react';
 import { AuthorizeUser } from '../../Client';
 import TextField from '../Common/TextField';
 
-const LoginForm = ({ setLogin }) => {
+const LoginForm = ({ setUserData }) => {
     const [details, setDetails] = useState({ login: "", password: "" });
     const [error, setError] = useState("");
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const loginFromCookies = Cookies.get('login');
+    const isAdminFromCookies = Cookies.get('isAdmin') || false;
     if (loginFromCookies) {
-        setLogin(loginFromCookies);
+        setUserData({ login: loginFromCookies, isAdmin: isAdminFromCookies });
     }
     const Login = details => {
         AuthorizeUser(details.login, details.password)
             .then(resp => {
-                setLogin(details.login);
+                setUserData({ login: details.login, isAdmin: resp.result.isAdmin });
+
             })
             .catch(e => {
                 enqueueSnackbar(e, { variant: 'error', action: null });
