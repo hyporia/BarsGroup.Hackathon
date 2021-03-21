@@ -42,6 +42,7 @@ namespace BarsGroup.Hackathon.Web.Controllers
 		}
 
 		[HttpPost]
+		[AllowAnonymous]
 		public async Task<BaseResponse<CreateUserResponse>> CreateUser([FromBody] CreateUserCommand command)
 		{
 			var result = await userService.CreateUserAsync(command);
