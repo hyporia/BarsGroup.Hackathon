@@ -7,7 +7,7 @@ import React, { useRef } from 'react';
 const FileUploadButton = ({
     text, onFileSelected, margin
 }) => {
-    const fileInput = useRef();
+    const fileInput = useRef(null);
 
     const onClick = () => {
         fileInput.current.click();
